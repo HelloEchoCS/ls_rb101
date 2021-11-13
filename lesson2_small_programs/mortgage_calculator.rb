@@ -71,7 +71,7 @@ def retrieve_duration_month
   duration_month.to_i
 end
 
-def total_month(year, month)
+def calculate_total_month(year, month)
   year * 12 + month
 end
 
@@ -79,7 +79,7 @@ def calculate_monthly_interest_rate(apr)
   (apr / 12 * 100).round(2)
 end
 
-def monthly_payment(loan_amount, apr, months)
+def calculate_monthly_payment(loan_amount, apr, months)
   monthly_interest_rate = apr / 12
   if monthly_interest_rate == 0
     result = loan_amount / months
@@ -99,9 +99,9 @@ loop do
   duration_year = retrieve_duration_year()
   duration_month = retrieve_duration_month()
 
-  total_duration_month = total_month(duration_year, duration_month)
+  total_duration_month = calculate_total_month(duration_year, duration_month)
   monthly_interest_rate = calculate_monthly_interest_rate(apr)
-  monthly_payment = monthly_payment(loan_amount, apr, total_duration_month)
+  monthly_payment = calculate_monthly_payment(loan_amount, apr, total_duration_month)
 
   display('monthly_interest_rate', monthly_interest_rate, 'percent')
   display('loan_duration_in_months', total_duration_month, 'string_month')
