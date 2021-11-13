@@ -1,13 +1,13 @@
-VALID_CHOICES = { 'r' => 'Rock',
-                  'p' => 'Paper',
-                  'sc' => 'Scissors',
-                  'l' => 'Lizard',
-                  'sp' => 'Spock' }
-WIN = { Rock: ['Scissors', 'Lizard'],
-        Paper: ['Rock', 'Spock'],
-        Scissors: ['Paper', 'Lizard'],
-        Lizard: ['Paper', 'Spock'],
-        Spock: ['Rock', 'Scissors'] }
+VALID_CHOICES = { 'r' => 'rock',
+                  'p' => 'paper',
+                  'sc' => 'scissors',
+                  'l' => 'lizard',
+                  'sp' => 'spock' }
+WIN = { rock: ['scissors', 'lizard'],
+        paper: ['rock', 'spock'],
+        scissors: ['paper', 'lizard'],
+        lizard: ['paper', 'spock'],
+        spock: ['rock', 'scissors'] }
 
 def prompt(message)
   Kernel.puts(">>> #{message}")
@@ -25,19 +25,31 @@ def list_of_choices
   choices_prompt
 end
 
+def valid_choice?(input)
+  VALID_CHOICES.keys.include?(input) || VALID_CHOICES.values.include?(input)
+end
+
+def return_player_choice(input)
+  if VALID_CHOICES.keys.include?(input)
+    VALID_CHOICES[input]
+  else
+    input
+  end
+end
+
 def retrieve_player_choice
   choice = ''
   loop do
     prompt(list_of_choices)
-    choice = Kernel.gets().chomp()
+    choice = Kernel.gets().chomp().downcase()
 
-    if VALID_CHOICES.keys.include?(choice)
+    if valid_choice?(choice)
       break
     else
       prompt("That's not a valid choice.")
     end
   end
-  VALID_CHOICES[choice]
+  return_player_choice(choice)
 end
 
 def display_result(player, computer)
