@@ -68,7 +68,7 @@ def we_have_a_winner?(score)
   score[0] == 3 || score[1] == 3
 end
 
-def announce_winnier(score)
+def announce_winner(score)
   prompt("You are the grand winner!") if score[0] == 3
   prompt("Computer is the grand winner!") if score[1] == 3
 end
@@ -113,7 +113,7 @@ loop do
     display_score(current_score)
   end
 
-  announce_winnier(current_score)
+  announce_winner(current_score)
 
   break unless play_again?(retrieve_play_again_choice())
   clear_screen
