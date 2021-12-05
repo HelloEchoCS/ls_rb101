@@ -89,6 +89,8 @@ def format_card_number(card)
   "|#{symbol}#{number}  | "
 end
 
+# Menu display & interactions
+
 def main_menu
   valid_options = get_valid_options(CONFIG['menu']['main_menu'])
   loop do
@@ -213,6 +215,8 @@ def set_stay_threshold
     end
   end
 end
+
+# Game mechanics & algorithms
 
 def count_aces(hand)
   count = 0
