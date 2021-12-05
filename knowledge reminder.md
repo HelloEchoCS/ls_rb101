@@ -13,3 +13,5 @@
 - Array#reduce
 - `any?` stops iterating after this point since there is no need to evaluate the remaining items in the array;
 - Array/Hash#keep_if vs select!
+- Hash#key vs Hash#keys
+- `map` method only returns AN ARRAY, not hash!!!!!

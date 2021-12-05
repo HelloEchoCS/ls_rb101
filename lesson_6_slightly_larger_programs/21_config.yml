@@ -1,0 +1,46 @@
+---
+cards_and_values:
+  '1': 1
+  '2': 2
+  '3': 3
+  '4': 4
+  '5': 5
+  '6': 6
+  '7': 7
+  '8': 8
+  '9': 9
+  '10': 10
+  J: 10
+  Q: 10
+  K: 10
+  A: 1
+menu:
+  main_menu:
+    start:
+      name: Start
+      item_num: '1'
+    rules:
+      name: Rules
+      item_num: '2'
+    settings:
+      name: Settings
+      item_num: '3'
+    exit:
+      name: Exit
+      item_num: '4'
+  settings:
+    max_totals:
+      name: Maximum Card Totals
+      item_num: '1'
+      value: 21
+    stay_threshold:
+      name: Dealer's 'Stay' Threshold
+      item_num: '2'
+      value: 17
+    score_to_win:
+      name: Score to Win
+      item_num: '3'
+      value: 5
+    go_back:
+      name: Main Menu
+      item_num: '4'
