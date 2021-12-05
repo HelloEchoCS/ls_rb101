@@ -97,7 +97,7 @@ def main_menu
     display_main_menu
     loop do
       answer = gets.chomp
-      next if valid_input?(answer, valid_options) == false
+      next unless valid_input?(answer, valid_options)
       return nil if answer == '1'
       show_rules if answer == '2'
       settings if answer == '3'
@@ -162,7 +162,7 @@ def settings
     display_settings
     loop do
       answer = gets.chomp
-      next if valid_input?(answer, valid_options) == false
+      next unless valid_input?(answer, valid_options)
       case answer
       when '1' then set_max_totals
       when '2' then set_stay_threshold

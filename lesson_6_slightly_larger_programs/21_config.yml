@@ -40,7 +40,7 @@ menu:
     score_to_win:
       name: Score to Win
       item_num: '3'
-      value: 5
+      value: 3
     go_back:
       name: Main Menu
       item_num: '4'
