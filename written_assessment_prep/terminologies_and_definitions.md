@@ -51,10 +51,7 @@ loop do
   break
 end
 ```
-On `line 1`, we are initializing the local variable `str` and assigning it to a string object with value "hello".
-On `line 3`, we are calling `loop` method and passing in `do...end` block as an argument.
-On `line 4`, we are reassigning local variable `str` to a new string object with value "world".
-On `line 5`, keyword `break` is used to break out of the loop.
+On `line 1` the local variable `str` is initialized to a string object `hello`. On `line 3-6`, we are calling `loop` method and passing in a `do...end` block as an argument. The `do...end` block followed by a method invocation creates an inner scope for local variables. Inside the block, the local variable `str` is reassigned to a new string object `world`. This reassignment is possible because local variables initialized from the outer scope are accessible from the inner scope.
 The code does not have an output and returns `nil`.
 
 ```ruby
@@ -69,17 +66,34 @@ end
 puts a
 puts b
 ```
-The code outputs `4` and throws an error: undefined local variable or method `b`.
+This code outputs `4` and throws an error: undefined local variable or method `b`.
 
-On `line 1`, we are initializing a local variable `a` and assigning it to an integer `4`.
-On `line 3`, we are calling `loop` method and passing `do...end` block to it as an argument.
-Inside the block, on `line 4`, we are reassigning the local variable `a` to a different integer `5`.
-On `line 5`, we are initializing a local variable `b` and assigning it to an integer `3`.
-On `line 6`, `break` keyword is used to break out of the loop.
-On `line 9`, we are calling `puts` method and passing in the local variable `a` as an argument. It prints out `4` which is the value of the object where variable `a` is pointing to, and returns `nil`.
-On `line 10`, `puts` method is called again and trying to pass in the local variable `b` as an argument. However, the local variable `b` is defined inside the block, and local variables that are initialized in an inner scope can not accessed in the outside scope. As a result, an exception will be raised because Ruby can not find a local variable or method called `b`.
+On line 1 the local variable `a` is initialized to an integer object `4`. On `line 3-7`, the `loop` method is invoked and a `do...end` block is passed to it as an argument. The `do...end` block followed by a method invocation creates an inner scope for local variables. Inside the block, on `line 4` the local variable `a` is reassigned to a new integer object `5`. This is possible because `a` is initialized in the outer scope and is accessible from the inner scope. On `line 5`, the local variable `b` is initialized to an integer object `3` in the inner scope.
+
+On `line 9`, we are invoking `puts` method and passing in local variable `a` as an argument. Since `a` is reassigned to an integer object `5`, this line outputs `5` and returns `nil`.
+On `line 10`, we are invoking `puts` method again. This time, the local varible `b` is passed in as an argument. However, since local variable `b` is initialized in an inner scope, it's not available in the outer scope. Therefore, Ruby doesn't know what `b` is and raises an exception: undefined local variable or method `b`.
+
+This example demonstrates the concept of local variable scoping rules. Specifically that variables initialized in the outer scope are accessible in the inner scope; Variables initialized in the inner scope are not available in the outer scope.
+
+```ruby
+a = 'hi'
+
+def some_method
+  puts a
+end
+
+some_method
+```
+The code raises an exception: undefined local variable or method `a`.
+
+On line 1, the local variable `a` is initialized to a string object `hi`. On line 3-5 we define the method `some_method` and create a self-contained scope. Inside the method definition, `puts` method is invoked and passed local variable `a` as an argument. However, since local variables initialized in the outer scope are not accessible inside the method definition, when we are calling the `some_method` method on 7, Ruby will raise an exception: undefined local variable or methdo `a`.
+
+This example demonstrates the concept of local variable scoping rules. Specifically that local variables initialized in the outer scope are not accessible inside the method definition.
+
 
 ## Variable Shadowing
+When parameter name of the block is the same as the name of the local variable which was initialized outside of the block, variable shadowing prevents access to variables of the same name initialized outside of the block.
+
 ```ruby
 a = 4
 b = 2
@@ -92,13 +106,21 @@ end
 puts a
 puts b
 ```
-On `line 1` we are initializing the local variable `a` and assigning it to an integer object with value `4`.
-On `line 2` we are initializing the local variable `b` and assigning it to an integer object with value `2`.
-On `line 4` we are calling the method `times` on the integer object with the value `2` and passing `do...end` block to it as an argument with one parameter `a`
-On `line 5` the local variable `a` that is initialized inside the scope of the block is reassigned to an integer object with the value `5`. Noted that because of variable shadowing, the local variable `a` that initialized in inner scope is not the same as the local variable with the same name initialized in outer scope.
-On `line 6` we are calling `puts` method on the local variable `a` in inner scope and passing the local variable `a` as an argument. So the code on `line 4-7` outputs `5` and `5`.
+On line 1, the local variable `a` is initialized to an integer object `4`. On line 2, the local variable `b` is initialized to an integer object `2`.
 
-## Mutating vs Non-mutating Methods / Pass By Reference vs Pass By Value / Variables As Pointers
+On line 4-7, `times` method is called on the integer object `2`. The `do...end` block is passed in as an argument with the local variable `a` as the block parameter. Since the block parameter `a` has the same name as the local variable initialized in the outer scope, variable shadowing happens and prevents access to the local variable `a` initialized in the outer scope. Therefore, on line 5, the block parameter `a` is reassigned to an integer object `5`. On line 6, `puts` method is called and block parameter `a` is passed in as an argument. Since `a` is now assigned to the integer object `5`, this line outputs `5` . Because the block is executed twice, line 4-7 outputs `5` and `5` then returns `2`.
+
+On line 9, we are calling `puts` method and passing in local variable `a` as an argument. Since local variable `a` is not changed, this line outputs the value `4` of the integer object `a` is pointing to.
+On line 10, we are calling `puts` method and passing in local variable `b` as an argument. It outputs the value `2` of the integer object `b` is pointing to.
+
+This example demonstrates the concept of variable shadowing. Specifically if we have a block parameter having the same name as the local variable initialized in the outer scope, variable shadowing prevents access to that local variable initialized in the outer scope.
+
+## Mutating vs Non-mutating Methods / Pass By Reference vs Pass By Value
+- Element assignment is mutating
+- Element assignment is a mutating method, for example: `Array#[]=` is actually `Array.[](0, arg)`
+- Only objects can be mutated, variables can't. Variables can be reassigned.
+- Methods are calling on objects, not variables
+
 ```ruby
 def amethod(param)
  param += " world"
@@ -161,12 +183,55 @@ t = fix(s)
 ```
 On `line 2`, the variable `value` is reassigned to the return value of calling the mutating method `upcase!` on the object referenced by `value`.
 
-## Different types of variables
+## Variables As Pointers
+Variables don't contain the value. They act as pointers to an address space in memory that contains the value.
+If you call a method that mutates the caller, it will change the value in that object's address space, and any variables that point to that object will be affected.
+
+```ruby
+def test(b)
+  b.map {|letter| "I like the letter: #{letter}"}
+end
+
+a = ['a', 'b', 'c']
+test(a)
+```
+What is `a` after the `test` method returns? Explain why.
+
+
 
 # Methods
 - puts vs return
 - method definition and method invocation
 - implicit return value of method invocations and blocks
+
+## puts vs return
+Ruby methods ALWAYS return the evaluated result of the last line of the expression unless an explicit return comes before it.
+```ruby
+def add_threes
+  number = 4
+  number + 3
+end
+```
+The assignment expression on line 2 evaluates to 4.
+Line 3 evaluates to 7. Since it is the last evaluated expression and we don't have any explicit `return` inside the method definition, it is the return value of the method `add_threes`.
+
+```ruby
+def add_three(number)
+  return number + 3
+  number + 4
+end
+
+returned_value = add_three(4)
+puts returned_value
+```
+This code outputs `7` and returns `nil`.
+
+On line 6 we initiate the local variable `returned_value` to the return value of the method call `add_three` with the integer `4` passed in as an argument.
+On line 1-4 we defined the method `add_three` with one parameter `number`. In this case, `number` is assigned to the passed in argument: integer `4`.
+On line 2, the keyword `return` is used, so we explicitly return the evaluated result of `number + 3`, which is `7`, without executing the next line. Therefore, the method call `add_three(4)` on line 6 returns `7`. It is then assigned to the local variable `returned_value`.
+On line 7, we are calling `puts` method and passing in `returned_value` as an argument, resulting in printing out the value `7` of the integer object `returned_value` is pointing to.
+
+This example demonstrates the concept of explicit return value of the method invocation using the keyword `return`.
 
 ## Method Definition And Method Invocation
 ```ruby
@@ -181,9 +246,11 @@ end
 
 example('hello')
 ```
-On `line 1-8` the method `example` is defined which takes one parameter. On `line 10` the method is called and a string `hello` is passed in as an argument.
-On `line 2` local variable `i` is initiated and assigned an integer object with value `3`. On `line 3` we are calling the `loop` method and passing in `do...end` block as an argument. On `line 4`, we are calling `puts` method and passing in the local variable `str` to it as an argument. On `line 5`, the local variable `i` is reassigned to the return value of the method call `Integer#-` on a local variable `i` and with the integer `1` passed to it as an argument. On `line 6`, the keyword `break` is used to break out of the loop when the the value of the object that local variable `i` is referencing equals to 0.
-This code outputs string `hello` 3 times and returns `nil`.
+On line 1-8 the method `example` is defined which takes one parameter `str`. On line 10 the method is called and a string `"hello"` is passed in as an argument. Upon the `example` method invocation, the method parameter `str` is now referencing the String object `"hello"` passed to the method.
+
+On line 2 local variable `i` is initiated to an Integer object `3`. On line 3 we are calling the `loop` method and passing in `do...end` block as an argument. Inside the block, on line 4 we are calling `puts` method and passing in the local variable `str` to it as an argument, printing out the String object `"hello"` that `str` references. On `line 5`, the local variable `i` is reassigned to the return value of the method call `Integer#-` on a local variable `i` with the integer `1` passed to it as an argument. On `line 6`, the keyword `break` is used to break out of the loop when the the value of the Integer object that local variable `i` is referencing equals to 0.
+
+This code outputs `"hello"` 3 times and returns `nil`.
 
 ## Method Side-effects vs Return Value
 ```ruby
@@ -199,11 +266,30 @@ puts name
 On `line 5`, the local variable `name` is initiated and assigned to the string object. On `line 7`, method `prefix` is called and `name` is passed in as an argument. Inside the method, the variable `str` is initialized and assigned to the same string object `name` is pointing to. However, nothing is done to this string object inside the method. Therefore, `name` is not affected. On `line 8`, `puts` is called to print the value of the string object name is pointing to which is 'joe'.
 
 # Collections: Strings, Arrays And Hashes
-- working with collections (Array, Hash, String), and popular collection methods (each, map, select, etc). Review the two lessons on these topics thoroughly.
+Working with collections (Array, Hash, String), and popular collection methods (each, map, select, etc). Review the two lessons on these topics thoroughly.
 
 Array: elememts are retrievable by index
 Mostly we use symbol as the key in a hash, why?
 Symble vs String: symbles are immutable strings.
+
+- Referencing an out-of-bounds index using `[]` method returns `nil`. To avoid the ambiguity especially with Array, use `Array#fetch` instead.
+- Elements in String and Array objects can be referenced using negative indices, starting from the last index in the collection `-1` and working backwards.
+
+## Array
+
+```ruby
+arr = [1, 'two', :three, '4']
+arr.slice(3, 1)
+arr.slice(3..3)
+arr.slice(3)
+arr[4]
+```
+What are the return values on line 2-5?
+
+## Hash
+- The keys must be unique. The last key-value pairs will over-write others if they have identical keys.
+- `Hash#keys` and `Hash#values` return an array.
+- Hash has a `to_a` method that returns a nested array: [[key, value], [key, value], ...]
 
 ```ruby
 arr = [1, 2, 3]
@@ -235,5 +321,416 @@ On `line 4` we are calling the indexed assignment method `Hash#[]=` on the local
 Therefore, on `line 6`, we are calling `puts` method and passing in the local variable `arr` as an argument, resulting in printing out the value of the Array object where `arr` is referencing, which is now [1, 2, 3, {:f => 6}].
 
 # Truthiness
+```ruby
+a = "Hello"
+
+if a
+  puts "Hello is truthy"
+else
+  puts "Hello is falsey"
+end
+```
+This code outputs `"Hello is truthy"` and returns `nil`.
+The local variable `a` is initialized to the string `"Hello"` on line 1. Since `a` itself is evaluated as true in the conditional statement on line 3-7, the `puts` method on line 4 is invoked, outputs `"Hello is truthy"` and returns `nil`.
+
+This example demonstrates the concept of truthiness. Specifically that every expression other than `false` and `nil` are evaluated as true.
 
 # Sorting
+
+Comparison is at the heart of how sorting works. We need to know if the objects has the `<=>` method implemtation, and how such method is defined.
+
+Method `<=>`:
+`a <=> b`
+- returns 1 if a < b
+- returns -1 if a > b
+- returns 0 if a == b
+- returns `nil` if a and b are not comparable
+
+When comparing multi-characters string, the comparison is done character by character. If both characters are the same then the next characters in the strings are compared. If the comparable characters are all equal, the longer string is considered to be greater.
+
+When comparing arrays, the comparison is done in an element-wise manner.
+
+## Array#sort
+
+
+
+# Practice
+
+```ruby
+def my_method(str)
+  i = 0
+  puts str
+end
+
+my_method('hello')
+```
+This code outputs `hello` and returns `nil`
+On `line 6`, we are calling `my_method` and passing in the string object `'hello'` as an argument.
+On `line 1-4` the method `my_method` is defined with one parameter `str`.
+Inside the `my_method` method, the passed in string object `'hello'` is assigned to `str`. Then we are calling `puts` method and passing in `str` as an argument. It prints out the value `'hello'` of the string object `str` is pointing to.
+
+Question: Consider the code below. Explain why line 8 returns 7 rather than 12? What concept does this demonstrate?
+```ruby
+num = 12
+
+3.times do |_|
+    num = 7
+    break
+end
+
+num #=> 7
+```
+On `line 1` the local variable `num` is initiated to an integer `12`. On `line 3-6` the method `Integer#times` is called on the integer object `3`, and a `do...end` block is passed in as an argument. The `do...end` block followed by method invocation creates a new inner scope for local variables. Inside the block the local variable `num` is reassigned to a new integer `7`. This reassignment is possible because local variables initialized in the outer scope are accessible from the inner scope.
+
+Therefore, on line `8`, the local variable `num` returns `7`.
+
+This example demonstrates the concept of local variable scoping rules. Specifically that variables initialized in the outer scope are accessible in the inner scope.
+
+```ruby
+def test(str)
+  str  += '!'
+  str.downcase!
+end
+
+test_str = 'Written Assessment'
+test(test_str)
+
+puts test_str
+```
+The local variable `test_str` is initialized to the String object `"Written Assessment"` on line 6. On line 7 we are calling `test` method and passing in `test_str` as an argument. Upon the `test` method invocation, the method parameter `str` is now referencing the same String object `test_str` references. On line 2, we are calling `String#+` method on `str` and passing in String object `"!"` as an argument, returning a new String object `"Written Assessment!"`. Then `str` is reassinged to this new String object. Form now on the local variable `str` is pointing to a different object from `test_str`, any further changes to `str` won't affect the object that `test_str` references.
+
+On line 9 we are calling `puts` method and passing `test_str` as an argument. Since the String object that `test_str` references is not mutated, it's value `"Written Assessment"` is what the output is.
+
+This example demonstrates the concept of variables as pointers as well as mutating vs. non-mutating methods. Specifically that non-mutating methods return a new object without mutating the caller, and reassignment causes the local variable points to a different object in memory.
+
+```ruby
+def repeater(string)
+  result = ''
+  string.each_char do |char|
+    result << char << char
+  end
+  result
+end
+
+repeater('Hello')
+```
+This code returns `'HHeelllloo'` on line 9.
+
+On line 9, `repeater` method is invoked with string `'Hello'` passed in as an argument. `repeater` is defined on line 1-7 with one parameter `string`. Upon invocation, `string` now references the string `'Hello'`. On line 2 the local variable `result` is initialized to an empty String object. On line 3, `each_char` method is invoked on `string`, a `do...end` block with parameter `char` is passed to it as an argument. `each_char` method iterates over each character of `'Hello'`, assigns the character to the block parameter `char`, then runs the block. On line 4, we are calling the destructive method `String#<<` on `result` twice, and mutates the String object `result` references by concatenating the character `char` references to it two times.
+
+Upon completion of the iteration, `each_char` method returns the collection it iterates over. Line 6 evaluates to the String object `result` is referencing. Since this is the last evaluated line in the method definition, String object `'HHeelllloo'` is returned.
+
+```ruby
+x = "hi there"
+my_hash = {x: "some value"}
+my_hash2 = {x => "some value"}
+```
+On line 1, the local variable `x` is initialized to String `"hi there"`. On line 2, the local variable `my_hash` is initialized to a Hash object with one key-value pair: Symbol object `:x` as key and String object `"some value"` as value. On line 3, the local variable `my_hash2` is initialized to a Hash object with one key-value pair: the local variable `x` as key and String `"some value"` as value.
+
+```ruby
+total = 0
+[1, 2, 3].each do |number|
+  total += number
+end
+puts total
+```
+On line 1, the local variable `total` is initialized to the integer `0`. On line 2, `Array#each` method is invoked on the array `[1, 2, 3]` and a block is passed as an argument. During the iteration, the block parameter `number` is assigned to each element of the calling array object. On line 3, the `Interger#+` method is called on `total` and passing in `number` as an argument. Then `total` is reassigned to the return value of the `+` method. When the iteration is finished, `total` is referencing the integer `6`.
+On line 5, the `puts` method is called, passing in `total` as an argument. Since integer `6` is now referenced by `total`, Integer `6` is printed and `nil` is returned.
+
+```ruby
+def test(b)
+  b.map {|letter| "I like the letter: #{letter}"}
+end
+
+a = ['a', 'b', 'c']
+test(a)
+```
+On line 5, the local variable `a` is initialized to an Array object `['a', 'b', 'c']`. On line 6, we are calling `test` method and passing in `a` as an argument. The `test` mehtod is defined on line 1-3 with one parameter `b`. Upon the method invocation, `b` is referencing the same Array object `a` references. On line 2, we are calling `Array#map` method on the local variable `b` and passing in a block as an argument. The block parameter `letter` is assigned to the current element of the calling Array object. Upon each iteration and executing of the block, the object `letter` references is embedded into the string around it via the string interpolation expression `#{letter}`. This resulting string is returned from the block and added to the new array object returned by `map` method. The `test` method invocation with local variable `a` on line 6 returns the new array.
+
+```ruby
+def include?(arr, search_item)
+  !arr.each { |item| return true if item == search_item }
+end
+
+include?([1, 2, 3, 4, 5], 6)
+```
+On line 5, we are invoking the method `include?` defined on line 1-3 and passing in an array object `[1, 2, 3, 4, 5]` and an integer `6` as two arguments. Upon the method invocation, the method parameter `arr` is referencing the passed in array object, and parameter `search_item` is referencing the passed in integer. On line 2, we are calling the `each` method on the local variable `arr` and passing in a block as an argument. The block parameter `item` will be assigned to the current element in the Array object that `arr` references in each iteration.
+
+Upon each iteration and executing of the block, if `item` is equal to the local variable `search_item`, we use `return` keyword and explicitly return a boolean value `true` and finish the method invocation.
+
+On the other hand, if `item` never equals to `search_item` and the iteration is completed, we are now evaluting the truthiness of the return value of the `each` method, and using a `!` opperator to reverse the result of the evaluation. Since `each` method returns the caller `arr`, which is evaluated as `true`, this line as well as the method returns `false`.
+
+Since none of the element in the array object `[1, 2, 3, 4, 5]` that `arr` references is equal to the integer `6` that `search_item` references, the `include?` method returns `false` on line 4.
+
+```ruby
+def merge(array_1, array_2)
+  array_1 | array_2
+end
+
+arr1, arr2 = ['hello'], ['hello', 'world']
+merged = merge(arr1, arr2)
+merged[0][0] = 'J'
+p merged
+p arr1
+p arr2
+```
+On line 5, local variables `arr1` and `arr2` are initialized to array objects `['hello']` and `['hello', 'world']` respectively. On line 6, the local variable `merged` is initialized to the return value of the method `merge` invocation with `arr1` and `arr2` passed in as arguments. On line 1, method parameters `array_1` and `array_2` are referencing the same objects that `arr1` and `arr2` reference, respectively.
+
+On line 2, we are calling `Array#|` method on `array_1` and passing in `array_2` as an argument, returning a new Array `['hello', 'hello world']`. Noted that the first and second String element in the array are the same String object that `arr1` and `arr2` is referencing, respectively. This new array is also the return value of the method `merge` since this is the last evaluated expression in the method definition.
+
+As a result, on line 6, the local variable `merged` is initialized to the array object `['hello'], ['hello', 'world']`.
+
+On line 7, we are calling the method `Array#[]` on `merged` and accessing the element in it indexed at `0`, which is the String object `hello`. Then we call the destructive `String#[]=` method on `merge[0]` and pass in the String `J` as an argument, resulting in replacing the first character of the String object `hello` to `'J'`. This change is also reflected on `arr1` that is referencing this string object `'hello'`
+
+As a result, on line 8-10, we are calling `p` method and passing in `merged`, `arr1` and `arr2` respectively, outputing `['Jello', 'world']`, `['Jello']` and `['hello', 'world']` respectively.
+
+
+```ruby
+a = 'Hello'
+b = a
+a = 'Goodbye'
+puts a
+puts b
+```
+The code outputs `Goodbye` and `Hello`, returns `nil`.
+On line 1, the local variable `a` is initialized to String `Hello`. On line 2 the local variable `b` is initialized to the same String object `a` is pointing to. On line 3 the local variable `a` is reassigned to a new String object `Goodbye`. As a result, when we are calling `puts` method and passing `a` as an argument, `Goodbye` is printed out and this line returns `nil`. Similarly, on line 5, `Hello` is the output and `nil` gets returned.
+This example demonstrates the concept of Variables as Pointers in Ruby. Specifically, variables in Ruby act as references to the actual object in the memory.
+
+```ruby
+a = 4
+
+loop do
+  a = 5
+  b = 3
+
+
+  break
+end
+
+puts a
+puts b
+```
+This code outputs `5` then raise an exception: undefined local variable or method `b`.
+On line 1, the local variable `a` is initialized to Integer `4`. On line 3-9, we are calling `loop` method and passing in a block as an argument. The block followed by method invocation creates an inner scope for local variables. On line 4, the local variable `a` is reassigned to `5`. On line 5, another local variable `b` scoped to the block is initialized to the Integer `3`.
+On line 11, we are calling `puts` method and passing `a` as an argument, outputs `5` and returns `nil`.
+However, since Ruby cannot access the local variable `b` from the outer scope, on line 12 we will get an error message by calling `puts` method and passing `b` as an argument.
+This example demonstrates Ruby's Variable Scoping Rules. Specifically that variables initialized in the inner scope is not available in the outer scope.
+
+```ruby
+a = 4
+b = 2
+
+loop do
+  c = 3
+  a = c
+  break
+end
+
+puts a
+puts b
+```
+This code outputs `3` and `2`, and returns `nil`.
+On line 1, the local variable `a` is initialized to Integer `4`. On line 2, the local variable `b` is initialized to Integer `2`. On line 4-8, we are calling `loop` method with a block. The block following a method invocation creates an inner scope for local variables. On line 5, the variable `c` local to the block is initialized to Integer `3`. On line 6, the local variable `a` is reassigned to the Integer `3` that `c` is pointing to. As a result, on line 10, we are calling `puts` method and passing `a` as an argument, printing out `3` and returns `nil`. Similarily, on line 11, the output is `2` and the return value is `nil`.
+This example demonstrates the concept of Variable Scoping Rules. Specifically that variables initialized in the outer scope are available in the inner scope.
+
+```ruby
+def example(str)
+  i = 3
+  loop do
+    puts str
+    i -= 1
+    break if i == 0
+  end
+end
+
+example('hello')
+```
+This code outputs `hello` three times and returns `nil`.
+On line 10, we are calling `example` method and passing in string object `hello` as an argument. Upon the invocation of the method, the local variable `str` is also initialized to the String object `hello`. On line 2, the local variable `i` is initialized to `3`. On line 3-7, we are calling `loop` method with a block. The block will keep being executed until `i` equals `0`. Inside the block, we are calling `puts` method and passing in `str` as an argument, outputing the string object that `str` is pointing to. We are also calling the `-` method on the local variable `i` and passing in `1` to it, then reassigning the local variable `i` to the return value of the `-` method, which resulting in `i` being substracted by 1 in each iteration. The block is executed three times until `i` equals `0`.
+This example demonstrates the concept of Loops by using the `loop` method with a block. Specifically that we can control the loop execution by using the `break` keyword.
+
+```ruby
+def greetings(str)
+  puts str
+  puts "Goodbye"
+end
+
+word = "Hello"
+
+greetings(word)
+```
+This code outputs `"Hello"` and `"Goodbye"`, and returns `nil`.
+On line 6, the local variable `word` is initialized to string `"Hello"`. On line 8, we are calling `greetings` method and passing in `word` as an argument. Upon the invocation of the method, the variable `str` local to the scope of the method is initialized to the same string object `"Hello"` that `word` is pointing to. Then on line 2 and 3, we are calling `puts` method and passing in `str` and `"Goodbye"` respectively, resulting in outputing `"Hello"` and `"Goodbye"`, and returns `nil`.
+This example demostrates the concept of method definition and method invocation. Specifically that we can use parameters to get access to data outside of method definition's scope by passing in arguments during the method invocation.
+
+```ruby
+arr = [1, 2, 3, 4]
+
+counter = 0
+sum = 0
+
+loop do
+  sum += arr[counter]
+  counter += 1
+  break if counter == arr.size
+end
+
+puts "Your total is #{sum}"
+```
+This code outputs `"You total is 10"` and returns `nil`.
+On line 1, the local variable `arr` is initialized to the Array object `[1, 2, 3, 4]`. On line 3 and 4, local variables `counter` and `sum` are initialized to Integer `0`. On line 5-9, we are calling `loop` method with a block. Inside the block, on line 6, we are incrementing `sum` by each element of `arr` through calling `+` method on `sum` and passing in the element of `arr` indexed at `counter` as an argument, then reassigning `sum` to the return value of the `+` method. On line 7, we are incrementing `counter` by 1 by calling `+` method again on `counter` and passing in `1` as an argument. On line 8, we are using the `break` keyword to stop the iteration when `counter` equals the number of elements in the array that `arr` is pointing to. The loop will iterate four times.
+Finally, on line 11, we are calling `puts` method and passing in the string with `sum` embbeded into it using the string interpolation expression `#{sum}`, resulting in outputing `"You total is 10"` and returns `nil`.
+
+```ruby
+a = 'Bob'
+
+5.times do |x|
+  a = 'Bill'
+end
+
+p a
+```
+This code outputs `"Bill"` and returns `"Bill"`.
+On line 1, the local variable `a` is initialized to the String `"Bob"`. On line 3, we are calling `times` method on `5` and passing in a block as an argument with the block parameter `x`. The block followed by method invocation creates an inner scope for local variables. Inside the block, the local variable `a` is reassigned to the string `"Bill"`. The block is executed five times.
+Finally, on line 7, we are calling `p` method as passing in `a` as an argument. Since now `a` is pointing to the string object `"Bill"`, this line outputs `"Bill"` and returns `"Bill"`.
+This example demostrates Loop using `times` method, as well as Ruby's Variable scoping rules. Specifically that variables initialized in the outer scope are available in the inner scope.
+
+```ruby
+animal = "dog"
+
+loop do |_|
+  animal = "cat"
+  var = "ball"
+  break
+end
+
+puts animal
+puts var
+```
+This code outputs `"cat"` then raise an exception "undefined local variable or method `var`".
+On line 1, the local variable `animal` is initialized to the string `"dog"`. On line 3-7, we are calling the `loop` method with a block. The block followed by method invocation creates an inner scope for local variables. As a result, on line 4, the local variable `animal` is reassgined to the string `"cat"`, and when we are calling `puts` method and passing `animal` as an argument on line 9, it outputs `"cat"` and returns `nil`. However, since the local variable `var` is initialized inside the block (the inner scope), this variable is not available in the outer scope. That's why when we are calling `puts` method and passing in `var` as an argument from the outer scope on line 10, Ruby can not find the local variable or method named `var` and raises an exception.
+This example demonstrates the variable scoping rules. Specifically that variables initialized in the inner scope are not available in the outer scope, but variables initialized in the outer scope are available in the inner scope.
+
+```ruby
+a = 4
+b = 2
+
+2.times do |a|
+  a = 5
+  puts a
+end
+
+puts a
+puts b
+```
+This code outputs `5`, `5`, `4` and `2` then returns `nil`.
+On line 1 and 2, local variables `a` and `b` are initialized to `4` and `2` respectively. On line 4-7, we are calling `times` method on `2` and passing in a block as an argument. The block followed by method invocation creates an inner scope for local variables. However, variable shadowing prevents access the variable of the same name intialized in the outer scope. Therefore, on line 5, the variable `a` local to the block is initialized and then reassigned to `5`. `5` is then printed out twice via calling the `puts` method when the block is executed two times. On line 9, we are calling `puts` method and passing in `a`, which is initialized in the outer scope, as an argument, resulting in outputing `4` and returning `nil`. Similarily, on line 10, `2` is the outputs and the code returns `nil`.
+This example demonstrates the concept of variable shadowing. Specifically that variables initialized in the outer scope that has the same name as the variable initialized in the inner scope are not available in the inner scope.
+
+we are calling `times` method on Integer `5` and passing in a block with the prameter `a` as an argument. The local variable `a` is assigned to values from `0` to `4` each time the block is executed.
+
+```ruby
+n = 10
+
+1.times do |n|
+  n = 11
+end
+
+puts n
+```
+This code outputs `10` and returns `nil`.
+On line 1, the local variable `n` is initialized to integer `10`. On line 3-5, we are calling `times` method on integer `1` and passing in a block with parameter `n` as an argument. The block followed method invocation creates an inner scope for local variables. However, variable shadowing prevents the access to the variable of the same name that initialized in the outer scope. As a result, the varibale `n` local to the block is initialized and reassigned to integer `11` on line 4. The value of the local variable `n` initialized in the outer scope remains `10`
+When we are calling `puts` method in the outer scope and passing `n` as an argument, the output is `10` and returns `nil`.
+This example demonstrates the concept of variable shadowing: When the variable initialzed in the inner scope has the same name as the variable initialized in the outer scope, variable shadowing prevents access to variables of the same name that initialized in the outer scope.
+
+```ruby
+animal = "dog"
+
+loop do |animal|
+  animal = "cat"
+  break
+end
+
+puts animal
+```
+This code outputs `"dog"` and returns `nil`.
+On line 1, local variable `animal` is initialized to string `"dog"`. We are calling `loop` method and passing in a block with parameter `animal` as an argument. The block followed by method invocation creates an inner scope for local variables. However, variable shadowing prevents the access to the local variable with the same name that initialized in the outer scope. As a result, on line 4, the variable local to the inner scope is initalized to the string `"cat"`, leave the local variable `animal` that initialized in the outer scope untouched. On the last line, we are calling `puts` method and passing in `animal` as an argument. Since `animal` in untouched, the output is `"dog"` and the return value is `nil`.
+This example demonstrates the concept of variable shadowing. Specifically that variable shadowing prevents the access to the local variable with the same name that initialized in the outer scope.
+
+```ruby
+a = "hi there"
+b = a
+a = "not here"
+```
+On line 1, the local variable `a` is initalized to string `"hi there"`. On line 2, the local variable `b` is initalized to the same string object that `a` is pointing to. On line 3, the local variable `a` is reassigned to a different string object `"not here"`.
+This example demonstrates the concept of variables as pointers. Specifically that variables in Ruby act as pointers to objects stored in the memory. the assignment operator `=` causes variables to point to a different object in the memory.
+
+```ruby
+a = "hi there"
+b = a
+a << ", Bob"
+```
+`a` and `b` are both `"hi there, Bob"`.
+On line 1, the local variable `a` is initialized to the string `"hi there"`. On line 2, the local variable `b` is initialized to the same string object that `a` is pointing to. On line 3, we are calling the destructive `String#<<` method and passing in string `", Bob"` as an arguemnt, mutating the string object `a` is referencing to `"hi there, Bob"`.
+This example demonstrates the concept of variables as pointers. Specifically that variables in Ruby act as pointers to objects stored in the memory. Mutating a object with detructive methods will affect all the variables that are referencing this object.
+
+```ruby
+a = [1, 2, 3, 3]
+b = a
+c = a.uniq
+```
+`a` and `b` are both `[1, 2, 3, 3]`. `c` is `[1, 2, 3]`.
+On line 1, the local variable `a` is initialized to the array object `[1, 2, 3, 3]`. On line 2, the local variable `b` is initialized to the same array object that `a` is referencing. On line 3, we are calling the non-mutating `uniq` method on `a`, returning a new array object `[1, 2, 3]`. Then the local variable `c` is initialized to this new array object. Now the local variable `c` is referencing the different array object from `a` and `b`.
+This example demonstrates the concept of variables as pointers and non-mutating methods. Specifically that variables in Ruby act as pointers to objects stored in the memory, and non-mutating methods return a new object without mutating the caller.
+
+```ruby
+def test(b)
+  b.map {|letter| "I like the letter: #{letter}"}
+end
+
+a = ['a', 'b', 'c']
+test(a)
+```
+`a` is `['a', 'b', 'c']`.
+On line 5, the local variable `a` is initialized to an array object `['a', 'b', 'c']`. On line 6, we are calling `test` method and passing in `a` as an argument. Upon the method invocation, the variable `b` local to the scope of the method is initialized to the same array object that `a` is referencing. Inside the method definition, we are calling the non-mutating `map` method on `b` and passing in a block as an argument. This method call returns a new array and leave the calling object, which is the array `['a', 'b', 'c']` that both `a` and `b` are referencing unchanged.
+As a result, after calling the `test` method on line 6, `a` is still pointing to the array object `['a', 'b', 'c']`.
+This example demonstrates the concept of variables as pointers, as well as non-mutating methods. Specifically that variables in Ruby act as pointers to objects stored in the memory, and a non-mutating method returns a new object without mutating the caller.
+
+```ruby
+a = 5.2
+b = 7.3
+
+a = b
+
+b += 1.1
+```
+`a` is `7.3`, `b` is `8.4`.
+On line 1 and 2, local variables `a` and `b` are initialized to integers `5.2` and `7.3` respectively. On line 4, the local variable `a` is reassigned to the same integer `7.3` that `b` is referencing. Line 6 is effectively `b = b + 1.1`. As a result, `b` is reassgined to the return value of `b + 1.1`, which is integer `8.4`.
+This example demonstrates the concept of variables as pointers. Specifically that variables in Ruby act as pointers to objects stored in the memory. Using the assignment operator `=` causes a variable to point to a different object.
+
+```ruby
+def test(str)
+  str  += '!'
+  str.downcase!
+end
+
+test_str = 'Written Assessment'
+test(test_str)
+
+puts test_str
+```
+This code outputs `"Written Assessment"` and returns `nil`.
+On line 6, the local variable `test_str` is initialized to the string `"Written Assessment"`. On line 7, we are calling `test` method and passing in `test_str` as an argument. Upon the method invocation, the variable `str` local to the scope of the method is initialized to the same string object `test_str` is pointing to. On line 2, the local variable `str` is reassigned to a new string object `"Written Assessment!"`. Any further actions on `str` will not have an effect on the original string object that `test_str` is pointing to. As a result, when we are calling `puts` method and passing in `test_str` as an argument, the string `"Written Assessment"` is the output and this line returns `nil`.
+This example demonstrates the concept of variables as pointers. Specifically that variables in Ruby act as pointers to objects located in the memory. When we are using the assignment operator `=`, it causes a variable to point to a different object.
+
+```ruby
+def plus(x, y)
+  x = x + y
+end
+
+a = 3
+b = plus(a, 2)
+
+puts a
+puts b
+```
