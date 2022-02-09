@@ -734,3 +734,301 @@ b = plus(a, 2)
 puts a
 puts b
 ```
+This code outputs `3` and `5`, returns `nil`.
+On line 5, the local variable `a` is initialized to the integer `3`. On line 6, the local variable `b` is initialized to the return value of calling the method `plus` and passing in `a` and integer `2` as arguments. Upon the method invocation, variables `x` and `y` that local to the scope of the method are initialized to `3` and `2` respectively. Line 2 evaluates to the result of adding `3` and `2`, which is `5`. Since this is the last evaluated line of the method `plus`, it returns `5`. As a result, the local variable `b` is initialized to `5`. When we are calling `puts` method and passing in `a` and `b` respectively, `3` and `5` are the output and the return value is `nil`.
+This example demonstrates the concept of object passing. Specifically that, when we call a method with arguments, Ruby reduce those arguments to objects, and makes them available inside the method
+
+```ruby
+def increment(x)
+  x << 'b'
+end
+
+y = 'a'
+increment(y)
+
+puts y
+```
+This code outputs `"ab"` and returns `nil`.
+On line 5, the local variable `y` is initialized to the string `"a"`. On line 6, we are calling `increment` method and passing in `y` as an argument. Upon the method invocation, variable `x` local to the scope of the method is initialized to the same string object `"a"` that `y` is pointing to. On line 2, we are calling the destructive method `String#<<` on `x` and passing in string `"b"` as an argument, resulting in the string object both `x` and `y` are pointing to being mutated to `"ab"`. Therefore, on the last line, when we are calling `puts` method and passing in `y` as an argument, the output is `"ab"` and the return value is `nil`.
+This example demonstrates the concept of variables as pointers. Specifically that variables in Ruby act as pointers to objects located in the memory. When we are calling a mutating method on an object, it will affect all the variables that are pointing to the object.
+
+```ruby
+def change_name(name)
+  name = 'bob'      # does this reassignment change the object outside the method?
+end
+
+name = 'jim'
+change_name(name)
+puts name
+```
+The reassignment in the method definition does not change the object outside the method. The reason is that reassignemnt is non-mutating. When we reassign a variable to an object, we merely cause the variable to point to this object. This action will not change the original object that the variable was pointing to. Additionally, in this case, the local variable `name` that is initalized in the outer scope is not the same variable `name` initialized in the scope of the method because method invocation in Ruby creates a self-contained scope, variables initialized in the outer scope are not available inside the method. As a result, both the reference of the local variable `name` in the outer scope, and the object it is referencing are not changed.
+
+```ruby
+def cap(str)
+  str.capitalize!   # does this affect the object outside the method?
+end
+
+name = "jim"
+cap(name)
+puts name
+```
+Line 2 affect the string object referenced by `name` outside the method. The reason is that when we are calling `cap` method on line 6 and passing in `name` as an argument, the variable `str` local to the scope of the method is initialized to the same string object that `name` is pointing to. When we are calling the mutating method `capitalize!` on `str`, the string object `str` is pointing to is mutated into `"JIM"`. This change also affects the local variable `name` since it is pointing to the same string object.
+This example demonstrates the concept of variables as pointers. Specifically that variables in Ruby act as pointers to objects located in the memory. When we are calling a mutating method on an object, it will affect all the variables that are pointing to the object.
+
+```ruby
+a = [1, 3]
+b = [2]
+arr = [a, b]
+arr
+
+a[1] = 5
+arr
+```
+`arr` on line 7 is `[[1. 5], [2]]`. The reason is that: On line 1 and 2, local variables `a` and `b` are initialized to arrays `[1, 3]` and `[2]` respectively. On line 3, the local variable `arr` is initialized to a nested array containing two inner arrays that `a` and `b` are pointing to. On line 6, we are using the mutating indexed assignment to change the second element in the array object that `a` references from `3` to `5`, this assignment mutates the array object `a` is pointing to. This mutation also reflects on the array object that `arr` references since it's first element is the same mutated array that `a` references. As a result, `arr` is now `[[1. 5], [2]]`.
+This example demonstrates the concept of variables as pointers in Ruby. Specifically that variables in Ruby act as pointers to objects located in the memory. Any mutating actions (method invocation, indexed assignment etc.) on an object will affect all the variables that are referencing this object, or other objects that contain this object.
+
+```ruby
+arr1 = ["a", "b", "c"]
+arr2 = arr1.dup
+arr2.map! do |char|
+  char.upcase
+end
+
+puts arr1
+puts arr2
+```
+`dup` method creates a shallow copy of the caller, which means only the caller object is copied. If the object contains other objects, they will be shared, not copied.
+
+```ruby
+def fix(value)
+  value.upcase!
+  value.concat('!')
+  value
+end
+
+s = 'hello'
+t = fix(s)
+```
+Both `s` and `t` have the same value `"HELLO!"`.
+On line 7, the local variable `s` is initialized to the string `"hello"`. On line 8, we are calling `fix` method and passing in `s` as an argument. Upon the method invocation, variable `value` local to the scope of the method is initialized to the same string `"hello"` that `s` is referencing. On line 2, we are calling the mutating method `upcase!` on `value`, which resulting the string object that `value` references changed to `"HELLO"`. On line 3, we are calling another mutating method `concat` on `value` and passing in string `"!"` as an argument, resulting in the string object that `value` references being changed to `"HELLO!"`. Since `s` is pointing to the same string object, now `s` has the value of `"HELLO!"` as well.
+Finally the local variable `t` is initialized to the return value of `fix` method invocation, which is `"HELLO"!` as well.
+This example demonstrates the concept of mutating methods. Specifically that methods that mutate the caller object will also affect all the variables that are referencing this object.
+
+```ruby
+def fix(value)
+  value = value.upcase
+  value.concat('!')
+end
+
+s = 'hello'
+t = fix(s)
+```
+`s` has the value of `"hello"`, `t` has the value of `"HELLO!"`.
+On line 6, the local variable `s` is initialized to the string `"hello"`. On line 7, we are calling `fix` method and passing in `s` as an argument. Upon the method invocation, variable `value` local to the scope of the method is initialized to the same string object `"hello"` that `s` references. On line 2, `value` is reassigned to the object returned by calling `upcase` method on `value`, which is a new string object `"HELLO"`. On line 3, we are calling the mutating `concat` method on this new string object and passing in the string `"!"`, mutating this object to  `"HELLO!"` and returns `"HELLO!"`. Noted that, at this point, `s` is still pointing to the string object `"hello"`.
+Finally, the local variable `t` is initialized to the return value of calling the `fix` method, which is the string object `"HELLO!"`.
+THis example demonstrates the concept of variables as pointers. Specifically that variables in Ruby act as pointers to objects in the memory. Reassignment is non-mutating, it merely causes a variable to point to a different object.
+
+```ruby
+def fix(value)
+  value << 'xyz'
+  value = value.upcase
+  value.concat('!')
+end
+
+s = 'hello'
+t = fix(s)
+```
+`s` has the value `"helloxyz"`, `t` has the value of `"HELLOXYZ!"`.
+On line 7, the local variable `s` is initialized to the string `"hello"`. On line 8, we are calling `fix` method and passing in `s` as an argument. Upon the method invocation, variable `value` local to the scope of the method is initialized to the same string object that `s` references. On line 2, we are calling the destructive `String#<<` method on `value` and passing in the string `"xyz"` as an arugment, mutating the string object that `value` references to `"helloxyz"`. On line 3, the local variable `value` is reassigned to the return value of calling `upcase` method on `value`, which is a new string object `"HELLOXYZ"`. At this point, `s` is referencing `"helloxyz"` and `value` is referencing `"HELLOXYZ"`. On line 4, we are calling the destructive method `concat` on `value` and passing in string `"!"`, mutating the caller to `"HELLOXYZ!"` and returning the same object.
+Finally, the local variable `t` is initialized to the return object of calling `fix` method, which is `"HELLOXYZ!"`.
+This example demonstrates the concept of variables as pointers. Specifically that variables in Ruby act as pointers to objects in the memory. Calling mutating methods on an object will also affect all the variables that reference it. Reassignment is non-mutating, it merely causes a variable to point to a different object.
+
+```ruby
+def fix(value)
+  value = value.upcase!
+  value.concat('!')
+end
+
+s = 'hello'
+t = fix(s)
+```
+`s` and `t` both have the value of `"HELLO!"`.
+On line 6, the local variable `s` is initialized to the string `"hello"`. On line 7, we are calling `fix` method and passing in `s` as an argument. Upon method invocation, variable `value` local to the scope of the method is initialized to the same string object that `s` references. On line 2, we are calling the destructive `String#upcase!` method on `value`, mutating the string object into `"HELLO"`, then reassigning `value` to the same string object. On line 3, we are calling the destructive `concat` method on `value` and passing in the string `"!"` to it, mutating the string object that `value` references to `"HELLO!"`, and returning the same string object. At this point, both `s` and `value` are pointing to the same string object `"HELLO!"`.
+Finally, on line 7, the local variable `t` is initialized to the return value of calling the `fix` method, which is `"HELLO!"` as well.
+This example demonstrates the concept of variables and pointers, as well as mutating methods. Specifically that variables in Ruby act as pointers to objects located in the memory. When we are calling mutating methods on the calling object, all variables pointing to this object are also affected.
+
+```ruby
+def fix(value)
+ value[1] = 'x'
+ value
+end
+
+s = 'abc'
+t = fix(s)
+```
+Both `s` and `t` have the value of `"axc"`.
+On line 6, the local variable `s` is initialized to the string `"abc"`. On line 7, we are calling the `fix` method, passing in `s` as an argument. Upon the method invocation, variable `value` local to the scope of the method is initialized to the same string object that `s` references. On line 2, we are using the mutating indexed assignment to change the second character of the string object `"abc"` that `value` references to `"axc"`. The method returns `"axc"` since the last statement of the method definition evaluates to the value of the local variable `value`.
+Finally, on line 7, the local variable `t` is initialized to the return value of calling the `fix` method, which is the string object `"axc"`.
+This example demonstrates the concept of mutating method in Ruby. Specifically that indexed assignment is a mutating method.
+
+```ruby
+def a_method(string)
+  string << ' world'
+end
+
+a = 'hello'
+a_method(a)
+
+p a
+```
+On line 5, the local variable `a` is initialized to the string `"hello"`. On line 6, we are calling `a_method` method and passing in `a` as an argument. Upon the method invocation, variable `string` local to the scope of the method is initialized to the same string object that `a` references. On line 2, we are calling the destructive `String#<<` method on `string` and passing in the string object `" world"` as an arugment, mutating the caller to `"hello world"`. This change also affects the local variable `a`.
+As a result, on line 8, when we are calling `p` method and passing in `a` as an argument, it's value `"hello world"` would be the output, and the return value is `nil`.
+This example demonstrates the concept of mutating method in Ruby. Specifically that methods like `String#<<` mutate its caller, and this will  also affect all the variables that are referencing the caller.
+
+```ruby
+num = 3
+
+num = 2 * num
+```
+On line 1, the local variable `num` is initialized to the integer `3`. On line 3, `num` is reassigned to the return value of calling `*` method on integer `2` and passing in `num` as an argument, which is the integer `6`.
+
+```ruby
+def add_name(arr, name)
+  arr = arr + [name]
+end
+
+names = ['bob', 'kim']
+add_name(names, 'jim')
+puts names
+```
+This code outputs `"bob"` and `"kim"`, returns `nil`.
+On line 5, the local variable `name` is initialized to an array with two string elements. On line 6, we are calling `add_name` method and passing in `names` and string `"jim"` as arguments. Upon the method invocation, local variable `arr` is initialized to the same array object that `names` references, and local variable `name` is initialized to the string object `"jim"`. On line 2, `arr` is reassigned to a new array object returned by calling `+` method on `arr` with an array object `[name]` passed in as an argument. Since `+` is a non-mutating method and `arr` is now pointing to a new array, `names` and the original array referenced by it is unchanged.
+As a result, when we are calling `puts` method and passing in `names` as an argument, it's elements `"bob"` and `"kim"` are printed out.
+This example demonstrates the concept of non-mutating methods in Ruby. Specifically that a non-mutating method returns a new object and won't mutate it's caller.
+
+```ruby
+[1, 2, 3].select do |num|
+  num > 5
+  'hi'
+end
+```
+`select` method performs selection based on the truthiness of the return value of the block. In this case, the return value of the block is always `"hi"`, which is a truthy value. As a result, all the elements in the caller will be selected and returned in a new array.
+
+```ruby
+[1, 2, 3].reject do |num|
+  puts num
+end
+```
+The return value of the `reject` method is `[1, 2, 3]`. `reject` method picks the element when the return value of the block evaluates as `false`. In this case, the return value of the block will always be the return value of calling the `puts` method, which is `nil`. `nil` in Ruby evaluates as `false`. Therefore, each element of the caller is picked and returned in a new array object `[1, 2, 3]`.
+
+```ruby
+['ant', 'bear', 'cat'].each_with_object({}) do |value, hash|
+  hash[value[0]] = value
+end
+```
+The return value is a hash object `{'a' => 'ant', 'b' => 'bear', 'c' => 'cat'}`.
+`each_with_object` method iterates through each element of the caller and returns the object that passed in as the argument. In this case, the return value would be the hash object that the local variable `hash` references. During each iteration, an indexed assignment is performed where the key is the first character of the current element, and the value is the current element. Therefore, after all the iterations are finished, the hash object referenced by `hash` is returned, which is  `{'a' => 'ant', 'b' => 'bear', 'c' => 'cat'}`.
+
+```ruby
+hash = { a: 'ant', b: 'bear' }
+hash.shift
+```
+`shift` method permanently removes the first element of the collection, and returns a two element array. In this case, when we are calling the `shift` method on the local variable `hash`, the first element of the hash object that `hash` is referencing is permanently removed from the hash object, returning the removed element in a `[key, value]` array: `[:a, 'ant']`.
+
+```ruby
+['ant', 'bear', 'caterpillar'].pop.size
+```
+This code returns `11`. This is a chaining method. First, destructive `pop` method is called on the array, removing the last element of the array and returning the element, which is the string object `"caterpillar"`. Then, the `size` method is called on this string object, returning the length of the string, which in this case is `11`.
+
+```ruby
+[1, 2, 3].any? do |num|
+  puts num
+  num.odd?
+end
+```
+What is the block's return value in the following code? How is it determined? Also, what is the return value of any? in this code and what does it output?
+
+The block's return value is determined by the last evaluated statement of the block, which is `num.odd?`. In this case, the return value of the block is `true` if current element is an odd number, and `false` if current element is an even number. The `any?` method returns `true` the first time the return value of the block evaluates as `true`, and the iteration stops here. If all the iterations are done and none of the return values of the block evaluate as `true`, `false` is returned.
+
+In this code, the output is `1` and the return value is `true`.
+
+```ruby
+{ a: 'ant', b: 'bear' }.map do |key, value|
+  if value.size > 3
+    value
+  end
+end
+```
+What is the return value of map in the following code? Why?
+
+The return value is an array `[nil, 'bear']`. `map` method takes the return value of the block after each iteration and returns a new array that contains them. In this case, in the first iteration, the block returns `nil` since `value.size > 3` evaluates as `false` and the `if` statement returns `nil`; In the second iteration, `value.size > 3` evaluates as `true`, The block returns `value` which is the string object `"bear"`. As a result, a new array `[nil, 'bear']` is returned by `map` method.
+
+```ruby
+[1, 2, 3].map do |num|
+  if num > 1
+    puts num
+  else
+    num
+  end
+end
+```
+What is the return value of the following code? Why?
+
+The return value of the code is an array `[1, nil, nil]`. the `map` method returns a new array based on the return value of the block. Each time the block is executed, if the `if` condition `num > 1` evaluates as `true`, the return value of the `puts` method, which is `nil` is returned. if `num > 1` evaluates as `false`, the local variable `num` is returned. In this case, other than `1`, `nil` is returned each time the block is executed. Therefore, the return value of `map` method is `[1, nil, nil]`.
+
+```ruby
+array = [1, 2, 3, 4, 5]
+
+array.select do |num|
+   puts num if num.odd?
+end
+```
+This code outputs `1`, `3` and `5`, returns `[]`.
+On line 1, the local variable `array` is initialized to an array object `[1, 2, 3, 4, 5]`. `select` method performs selection if the return value of the block evaluates as `true`. In this case, when the `if` condition evaluates as `true`, current element of the collection is printed out and returns `nil`; When the `if` condition evaluates as `false`, the `if` statement returns `nil`. Therefore, `1`, `3` and `5` are outputed while `nil` is returned by the block in each iteration.
+
+As a result, nothing is selected by calling the `select` method on the local variable `array`.
+
+```ruby
+arr = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+
+arr.select { |n| n.odd? }
+```
+This code returns `[1, 3, 5, 7, 9]`.
+On line 1, the local variable `arr` is initialized to an array object with elements from integer `1` to `10`. `select` method performs selection if the return value of the block evaluates as `true`. In this case, whenever the current element is an odd number, the block returns `true`. Therefore, when we are calling `select` method on `arr` and passing in a block as an argument, all the odd numbers in the collection are selected and returned as a new array object.
+
+```ruby
+arr = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+
+new_array = arr.select do |n|
+  n + 1
+end
+p new_array
+```
+This code outputs and returns `[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]`.
+On line 1, the local variable `arr` is initialized to an array object. On line 3, the local variable `new_array` is initialized to the return value of the `select` method invocation on `arr`. `select` method performs selection if the block passed to it evaluates as `true`. In this case, the last evaluated statement within the block is `n + 1`, which always returns a truthy value. Therefore, all the elements in the array object that `arr` is referencing are selected and returned in the form of a new array object, which is `[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]`.
+As a result, when we are calling `p` method and passing in `new_array` as an argument, `[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]` will be the output and the return value.
+This example demonstrates the concept of using `select` method to iterate through collections in Ruby. Specifically that `select` method performs selection if the block passed to it evaluates as `true`, and returns a new array object.
+
+```ruby
+words = %w(jump trip laugh run talk)
+
+new_array = words.map do |word|
+  word.start_with?("t")
+end
+
+p new_array
+```
+This code outputs and returns `[false, true, false, false, true]`.
+On line 1, the local variable `words` is initialized to an array object. On line 3, the local variable `new_array` is initialized to the return value of calling the `map` method on `words` and passing in a block as an argument. The `map` method returns a new array which contains elements based on the return value of the block. During each iteration, the element of the array that `words` references is passed into the block and assigned to the block parameter `word`. Then we are calling `start_with?` method on the variable `word` and passing in string `"t"` as an argument. The block returns `true` if the value of the variable `word` starts with the letter `t`, and returns `false` if otherwise. As a result, after all the iterations are done, the `map` method returns a new array and the local variable `new_array` is assigned to it, which is `[false, true, false, false, true]`.
+When we are calling `p` method and passing in `new_array` as an argument, the output and return value are both `[false, true, false, false, true]`.
+
+```ruby
+arr = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+
+arr.each { |n| puts n }
+```
+The code outputs numbers from `1` to `10`, and returns an array `[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]`
+On line 1, the local variable `arr` is initialized to an array object. On line 3, we are calling `each` method on `arr` and passing in a block as an argument. Each element of the array referenced by `arr` is passed into the block and assigned to the block parameter `n`. Within the block we are calling `puts` method and passing the variable `n` to it, printing out the element and retuning `nil`. Therefore, after all the iterations are done, each element of the array referenced by `arr` is printed out. Since `each` method always returns its caller, the original array that `arr` is referencing would be the return value.
+
+
+
